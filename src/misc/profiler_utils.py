@@ -13,7 +13,8 @@ def stats(
     input_shape: Tuple = (1, 3, 640, 640),
 ) -> Tuple[int, dict]:
     base_size = cfg.train_dataloader.collate_fn.base_size
-    input_shape = (1, 3, base_size, base_size)
+    h, w = cfg.yaml_cfg.get("eval_spatial_size") or (base_size, base_size)  # rectangular inputs (e.g. 128x800)
+    input_shape = (1, 3, h, w)
 
     model_for_info = copy.deepcopy(cfg.model).deploy()
 

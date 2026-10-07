@@ -1,0 +1,50 @@
+# The only file to edit. Then:  bash train.sh   (or: python tools/steel/prepare_experiment.py experiment.yml --train)
+# Relative paths are relative to this file. Values: D-FINE-X from Objects365 weights on the 800x128 steel strips.
+
+name: dfine_x_800x128                # run folder: <output_root>/<name>/
+model: x                            # n | s | m | l | x   (D-FINE with HGNetv2 B0 / B0 / B2 / B4 / B5)
+pretrain: obj365                    # start checkpoint for weights: auto, and the upstream fine-tuning recipe:
+                                    #   obj365   (s, m, l, x) Objects365 - the authors' advice for custom data; recipe obj2custom
+                                    #   obj2coco (s, m, l, x) Objects365 + COCO; recipe custom
+                                    #   coco     (n, s, m, l, x) COCO; recipe custom
+weights: auto                       # auto = weights/dfine_<model>_<pretrain>.pth (bash scripts/download_weights.sh)
+                                    # or a path to a D-FINE checkpoint / an earlier best.pth;
+                                    # none = start from the ImageNet backbone only (needs --backbone download)
+output_root: outputs                # results: outputs/<name>/best.pth, metrics.csv, metrics.png, log.txt, train.log
+
+data:
+  format: csv                       # csv | coco
+  # csv, one row per box: image_path (absolute), instance_label (string), bbox_x_tl, bbox_y_tl, bbox_x_br,
+  #   bbox_y_br (pixels of the original image), split (train | val | test). test is kept: evaluate.py --split test.
+  #   Empty label / bbox = image without boxes. Converted once to data_cache/<name>/ (again when the CSV changes).
+  #   The legacy steel CSV (ImageId, ClassId, x_min, ..., split) is detected by its header and needs `images`.
+  csv: ../steel-defect-detection/train_bboxes.csv
+  images: ../steel-defect-detection/train_images   # optional: only for relative image_path or the legacy CSV
+  class_merge: {6: 1, 5: 3}         # old label -> new label, e.g. {scratch_small: scratch}; {} keeps all classes
+  # coco: category ids are remapped to 0..K-1 automatically when needed
+  # train_images: path/to/train_images
+  # train_ann: path/to/train.json
+  # val_images: path/to/val_images
+  # val_ann: path/to/val.json
+  # test_images: path/to/test_images  # optional, for evaluate.py --split test
+  # test_ann: path/to/test.json
+
+input_size: [128, 800]              # [h, w], multiples of 32; 1600x256 strips -> 800x128 keeps the aspect ratio
+epochs: 12
+batch_size: 20                      # 800x128, D-FINE-X: see README for the memory it takes
+val_batch_size: 16
+workers: 4                          # data loader processes per GPU
+devices: [0]                        # GPU ids as nvidia-smi shows them; several = DDP on this machine, e.g. [0, 1, 2, 3]
+                                    # batch_size / val_batch_size are totals over all GPUs (per GPU: batch_size / N)
+
+optimizer: adamw                    # adamw (the D-FINE recipe) | sgd
+lr: auto                            # head lr. auto: adamw = recipe lr scaled to batch_size (X: 2.5e-4 at 32), sgd 0.01
+backbone_lr_ratio: auto             # backbone lr = lr * ratio. auto: the recipe's ratio (X 0.01, L 0.05, M 0.1, S/N 0.5)
+weight_decay: auto                  # auto: adamw = recipe (1.25e-4), sgd 1e-4
+
+multiscale: false                   # square inputs only
+amp: true
+seed: 0
+
+best_metric: map50                  # map50 | map (AP50:95) - which metric selects best.pth
+save_best_only: true                # run folder keeps only best.pth (internal checkpoints are removed after training)

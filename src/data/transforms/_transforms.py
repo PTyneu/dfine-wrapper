@@ -62,7 +62,7 @@ class PadToSize(T.Pad):
     )
 
     def _get_params(self, flat_inputs: List[Any]) -> Dict[str, Any]:
-        sp = F.get_spatial_size(flat_inputs[0])
+        sp = (F.get_size if hasattr(F, "get_size") else F.get_spatial_size)(flat_inputs[0])  # renamed in tv 0.17
         h, w = self.size[1] - sp[0], self.size[0] - sp[1]
         self.padding = [0, 0, w, h]
         return dict(padding=self.padding)
@@ -83,6 +83,10 @@ class PadToSize(T.Pad):
         if len(outputs) > 1 and isinstance(outputs[1], dict):
             outputs[1]["padding"] = torch.tensor(self.padding)
         return outputs
+
+    # torchvision >= 0.21 calls transform / make_params (ConvertBoxes / ConvertPILImage alias them already)
+    transform = _transform
+    make_params = _get_params
 
 
 @register()

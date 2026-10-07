@@ -4,3 +4,10 @@ weight/
 wandb/
 *.pth
 *.onnx
+
+# dfine-steel
+outputs/
+weights/
+data_cache/
+configs/_generated/
+.venv/

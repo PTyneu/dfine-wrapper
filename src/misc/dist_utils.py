@@ -44,7 +44,8 @@ def setup_distributed(
         WORLD_SIZE = int(os.getenv("WORLD_SIZE", 1))
 
         # torch.distributed.init_process_group(backend=backend, init_method='env://')
-        torch.distributed.init_process_group(init_method="env://")
+        backend = None if torch.distributed.is_nccl_available() else "gloo"  # Windows builds have no NCCL
+        torch.distributed.init_process_group(backend=backend, init_method="env://")
         torch.distributed.barrier()
 
         rank = torch.distributed.get_rank()
@@ -55,6 +56,8 @@ def setup_distributed(
             print("Initialized distributed mode...")
 
     except Exception:
+        if int(os.getenv("WORLD_SIZE", 1)) > 1:  # started by torchrun: each rank training alone would be wrong
+            raise
         enabled_dist = False
         print("Not init distributed mode.")
 

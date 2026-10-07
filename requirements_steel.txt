@@ -1,0 +1,16 @@
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.7.1
+torchvision==0.22.1
+faster-coco-eval>=1.6.6
+pycocotools
+PyYAML
+tensorboard
+scipy
+calflops
+transformers
+loguru
+pillow
+matplotlib
+pandas>=2,<3
+onnx
+onnxruntime

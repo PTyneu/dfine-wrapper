@@ -1,701 +1,268 @@
-<!--# [D-FINE: Redefine Regression Task of DETRs as Fine-grained Distribution Refinement](https://arxiv.org/abs/xxxxxx) -->
+# dfine-wrapper
 
-English | [简体中文](README_cn.md) | [日本語](README_ja.md) | [English Blog](src/zoo/dfine/blog.md) | [中文博客](src/zoo/dfine/blog_cn.md)
+D-FINE (upstream `Peterande/D-FINE`, коммит `956d170`) для детекции дефектов стали. Здесь один конфиг на
+весь эксперимент, загрузка весов одной командой и исправления для Windows, RTX 50xx и прямоугольного входа.
+Устроен так же, как `deim-steel`: те же `experiment.yml`, CSV, `best.pth`, графики, DDP, инференс и ONNX.
+Описание самого D-FINE — в [README_DFINE.md](README_DFINE.md).
 
-<h2 align="center">
-  D-FINE: Redefine Regression Task of DETRs as Fine&#8209;grained&nbsp;Distribution&nbsp;Refinement
-</h2>
+Код D-FINE распространяется под Apache-2.0 ([LICENSE](LICENSE)), коммерческое использование разрешено. Авторы
+оговаривают, что веса `*_obj365` и `*_obj2coco` могут подпадать под условия датасета Objects365, и для
+коммерческого использования их нельзя считать разрешёнными. Веса `*_coco` такой оговорки не имеют.
 
+## Установка
 
-
-<p align="center">
-    <a href="https://huggingface.co/spaces/developer0hye/D-FINE">
-        <img alt="hf" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue">
-    </a>
-    <a href="https://github.com/Peterande/D-FINE/blob/master/LICENSE">
-        <img alt="license" src="https://img.shields.io/badge/LICENSE-Apache%202.0-blue">
-    </a>
-    <a href="https://github.com/Peterande/D-FINE/pulls">
-        <img alt="prs" src="https://img.shields.io/github/issues-pr/Peterande/D-FINE">
-    </a>
-    <a href="https://github.com/Peterande/D-FINE/issues">
-        <img alt="issues" src="https://img.shields.io/github/issues/Peterande/D-FINE?color=olive">
-    </a>
-    <a href="https://arxiv.org/abs/2410.13842">
-        <img alt="arXiv" src="https://img.shields.io/badge/arXiv-2410.13842-red">
-    </a>
-<!--     <a href="mailto: pengyansong@mail.ustc.edu.cn">
-        <img alt="email" src="https://img.shields.io/badge/contact_me-email-yellow">
-    </a> -->
-      <a href="https://results.pre-commit.ci/latest/github/Peterande/D-FINE/master">
-        <img alt="pre-commit.ci status" src="https://results.pre-commit.ci/badge/github/Peterande/D-FINE/master.svg">
-    </a>
-    <a href="https://github.com/Peterande/D-FINE">
-        <img alt="stars" src="https://img.shields.io/github/stars/Peterande/D-FINE">
-    </a>
-</p>
-
-
-
-<p align="center">
-    📄 This is the official implementation of the paper:
-    <br>
-    <a href="https://arxiv.org/abs/2410.13842">D-FINE: Redefine Regression Task of DETRs as Fine-grained Distribution Refinement</a>
-</p>
-
-
-
-<p align="center">
-Yansong Peng, Hebei Li, Peixi Wu, Yueyi Zhang, Xiaoyan Sun, and Feng Wu
-</p>
-
-<p align="center">
-University of Science and Technology of China
-</p>
-
-<p align="center">
-    <a href="https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as">
-        <img alt="sota" src="https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/d-fine-redefine-regression-task-in-detrs-as/real-time-object-detection-on-coco">
-    </a>
-</p>
-
-<!-- <table><tr>
-<td><img src=https://github.com/Peterande/storage/blob/master/latency.png border=0 width=333></td>
-<td><img src=https://github.com/Peterande/storage/blob/master/params.png border=0 width=333></td>
-<td><img src=https://github.com/Peterande/storage/blob/master/flops.png border=0 width=333></td>
-</tr></table> -->
-
-<p align="center">
-<strong>If you like D-FINE, please give us a ⭐! Your support motivates us to keep improving!</strong>
-</p>
-
-<p align="center">
-    <img src="https://raw.githubusercontent.com/Peterande/storage/master/figs/stats_padded.png" width="1000">
-</p>
-
-D-FINE is a powerful real-time object detector that redefines the bounding box regression task in DETRs as Fine-grained Distribution Refinement (FDR) and introduces Global Optimal Localization Self-Distillation (GO-LSD), achieving outstanding performance without introducing additional inference and training costs.
-
-<details open>
-<summary> Video </summary>
-
-We conduct object detection using D-FINE and YOLO11 on a complex street scene video from [YouTube](https://www.youtube.com/watch?v=CfhEWj9sd9A). Despite challenging conditions such as backlighting, motion blur, and dense crowds, D-FINE-X successfully detects nearly all targets, including subtle small objects like backpacks, bicycles, and traffic lights. Its confidence scores and the localization precision for blurred edges are significantly higher than those of YOLO11.
-
-<!-- We use D-FINE and YOLO11 on a street scene video from [YouTube](https://www.youtube.com/watch?v=CfhEWj9sd9A). Despite challenges like backlighting, motion blur, and dense crowds, D-FINE-X outperforms YOLO11x, detecting more objects with higher confidence and better precision. -->
-
-https://github.com/user-attachments/assets/e5933d8e-3c8a-400e-870b-4e452f5321d9
-
-</details>
-
-## 🚀 Updates
-- [x] **\[2024.10.18\]** Release D-FINE series.
-- [x] **\[2024.10.25\]** Add custom dataset finetuning configs ([#7](https://github.com/Peterande/D-FINE/issues/7)).
-- [x] **\[2024.10.30\]** Update D-FINE-L (E25) pretrained model, with performance improved by 2.0%.
-- [x] **\[2024.11.07\]** Release **D-FINE-N**, achiving 42.8% AP<sup>val</sup> on COCO @ 472 FPS<sup>T4</sup>!
-
-## Model Zoo
-
-### COCO
-| Model | Dataset | AP<sup>val</sup> | #Params | Latency | GFLOPs | config | checkpoint | logs |
-| :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-**D&#8209;FINE&#8209;N** | COCO | **42.8** | 4M | 2.12ms | 7 | [yml](./configs/dfine/dfine_hgnetv2_n_coco.yml) | [42.8](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_n_coco.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/coco/dfine_n_coco_log.txt)
-**D&#8209;FINE&#8209;S** | COCO | **48.5** | 10M | 3.49ms | 25 | [yml](./configs/dfine/dfine_hgnetv2_s_coco.yml) | [48.5](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_s_coco.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/coco/dfine_s_coco_log.txt)
-**D&#8209;FINE&#8209;M** | COCO | **52.3** | 19M | 5.62ms | 57 | [yml](./configs/dfine/dfine_hgnetv2_m_coco.yml) | [52.3](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_m_coco.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/coco/dfine_m_coco_log.txt)
-**D&#8209;FINE&#8209;L** | COCO | **54.0** | 31M | 8.07ms | 91 | [yml](./configs/dfine/dfine_hgnetv2_l_coco.yml) | [54.0](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_l_coco.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/coco/dfine_l_coco_log.txt)
-**D&#8209;FINE&#8209;X** | COCO | **55.8** | 62M | 12.89ms | 202 | [yml](./configs/dfine/dfine_hgnetv2_x_coco.yml) | [55.8](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_x_coco.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/coco/dfine_x_coco_log.txt)
-
-
-### Objects365+COCO
-| Model | Dataset | AP<sup>val</sup> | #Params | Latency | GFLOPs | config | checkpoint | logs |
-| :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-**D&#8209;FINE&#8209;S** | Objects365+COCO | **50.7** | 10M | 3.49ms | 25 | [yml](./configs/dfine/objects365/dfine_hgnetv2_s_obj2coco.yml) | [50.7](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_s_obj2coco.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/obj2coco/dfine_s_obj2coco_log.txt)
-**D&#8209;FINE&#8209;M** | Objects365+COCO | **55.1** | 19M | 5.62ms | 57 | [yml](./configs/dfine/objects365/dfine_hgnetv2_m_obj2coco.yml) | [55.1](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_m_obj2coco.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/obj2coco/dfine_m_obj2coco_log.txt)
-**D&#8209;FINE&#8209;L** | Objects365+COCO | **57.3** | 31M | 8.07ms | 91 | [yml](./configs/dfine/objects365/dfine_hgnetv2_l_obj2coco.yml) | [57.3](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_l_obj2coco_e25.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/obj2coco/dfine_l_obj2coco_log_e25.txt)
-**D&#8209;FINE&#8209;X** | Objects365+COCO | **59.3** | 62M | 12.89ms | 202 | [yml](./configs/dfine/objects365/dfine_hgnetv2_x_obj2coco.yml) | [59.3](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_x_obj2coco.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/obj2coco/dfine_x_obj2coco_log.txt)
-
-**We highly recommend that you use the Objects365 pre-trained model for fine-tuning:**
-
-⚠️ **Important**: Please note that this is generally beneficial for complex scene understanding. If your categories are very simple, it might lead to overfitting and suboptimal performance.
-<details>
-<summary><strong> 🔥 Pretrained Models on Objects365 (Best generalization) </strong></summary>
-
-| Model | Dataset | AP<sup>val</sup> | AP<sup>5000</sup> | #Params | Latency | GFLOPs | config | checkpoint | logs |
-| :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-**D&#8209;FINE&#8209;S** | Objects365 | **31.0** | **30.5** | 10M | 3.49ms | 25 | [yml](./configs/dfine/objects365/dfine_hgnetv2_s_obj365.yml) | [30.5](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_s_obj365.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/obj365/dfine_s_obj365_log.txt)
-**D&#8209;FINE&#8209;M** | Objects365 | **38.6** | **37.4** | 19M | 5.62ms | 57 | [yml](./configs/dfine/objects365/dfine_hgnetv2_m_obj365.yml) | [37.4](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_m_obj365.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/obj365/dfine_m_obj365_log.txt)
-**D&#8209;FINE&#8209;L** | Objects365 | - | **40.6** | 31M | 8.07ms | 91 | [yml](./configs/dfine/objects365/dfine_hgnetv2_l_obj365.yml) | [40.6](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_l_obj365.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/obj365/dfine_l_obj365_log.txt)
-**D&#8209;FINE&#8209;L (E25)** | Objects365 | **44.7** | **42.6** | 31M | 8.07ms | 91 | [yml](./configs/dfine/objects365/dfine_hgnetv2_l_obj365.yml) | [42.6](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_l_obj365_e25.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/obj365/dfine_l_obj365_log_e25.txt)
-**D&#8209;FINE&#8209;X** | Objects365 | **49.5** | **46.5** | 62M | 12.89ms | 202 | [yml](./configs/dfine/objects365/dfine_hgnetv2_x_obj365.yml) | [46.5](https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_x_obj365.pth) | [url](https://raw.githubusercontent.com/Peterande/storage/refs/heads/master/logs/obj365/dfine_x_obj365_log.txt)
-- **E25**: Re-trained and extended the pretraining to 25 epochs.
-- **AP<sup>val</sup>** is evaluated on *Objects365* full validation set.
-- **AP<sup>5000</sup>** is evaluated on the first 5000 samples of the *Objects365* validation set.
-</details>
-
-**Notes:**
-- **AP<sup>val</sup>** is evaluated on *MSCOCO val2017* dataset.
-- **Latency** is evaluated on a single T4 GPU with $batch\\_size = 1$, $fp16$, and $TensorRT==10.4.0$.
-- **Objects365+COCO** means finetuned model on *COCO* using pretrained weights trained on *Objects365*.
-- **License note:** Checkpoints trained or pretrained on Objects365 (*_obj365, *_obj2coco) may be subject to the Objects365 dataset terms and should not be assumed to be commercially cleared under the D-FINE license.
-
-
-
-## Quick start
-
-### Setup
-
-```shell
-conda create -n dfine python=3.11.9
-conda activate dfine
-pip install -r requirements.txt
+```bash
+uv sync          # .venv по pyproject.toml и uv.lock: torch 2.7.1 со сборкой CUDA 12.8 (нужна для RTX 50xx)
 ```
 
+Скрипты `*.sh` сами находят `.venv` репозитория. Другой интерпретатор задаётся через
+`PYTHON=/путь/к/python bash train.sh`. Без uv:
+`pip install -r requirements_steel.txt` (тот же набор пакетов). Исходный `requirements.txt` D-FINE не содержит
+`pycocotools`, а без него датасет не создаётся.
 
-### Data Preparation
+## 1. Веса
 
-<details>
-<summary> COCO2017 Dataset </summary>
-
-1. Download COCO2017 from [OpenDataLab](https://opendatalab.com/OpenDataLab/COCO_2017) or [COCO](https://cocodataset.org/#download).
-1. Modify paths in [coco_detection.yml](./configs/dataset/coco_detection.yml)
-
-    ```yaml
-    train_dataloader:
-        img_folder: /data/COCO2017/train2017/
-        ann_file: /data/COCO2017/annotations/instances_train2017.json
-    val_dataloader:
-        img_folder: /data/COCO2017/val2017/
-        ann_file: /data/COCO2017/annotations/instances_val2017.json
-    ```
-
-</details>
-
-<details>
-<summary> Objects365 Dataset </summary>
-
-1. Download Objects365 from [OpenDataLab](https://opendatalab.com/OpenDataLab/Objects365).
-
-2. Set the Base Directory:
-```shell
-export BASE_DIR=/data/Objects365/data
+```bash
+bash scripts/download_weights.sh                       # чекпоинт для model + pretrain из experiment.yml
+bash scripts/download_weights.sh x --pretrain coco     # другой вариант: obj365 | obj2coco | coco | all
+bash scripts/download_weights.sh x --backbone          # + ImageNet-бэкбон HGNetv2 (только для weights: none)
 ```
 
-3. Extract and organize the downloaded files, resulting directory structure:
+Всё скачивается с GitHub releases авторов (`github.com/Peterande/storage`). Уже лежащие файлы не перекачиваются.
 
-```shell
-${BASE_DIR}/train
-├── images
-│   ├── v1
-│   │   ├── patch0
-│   │   │   ├── 000000000.jpg
-│   │   │   ├── 000000001.jpg
-│   │   │   └── ... (more images)
-│   ├── v2
-│   │   ├── patchx
-│   │   │   ├── 000000000.jpg
-│   │   │   ├── 000000001.jpg
-│   │   │   └── ... (more images)
-├── zhiyuan_objv2_train.json
+| `pretrain` | Модели | На чём обучен | Файл |
+|---|---|---|---|
+| `obj365` | s, m, l, x | Objects365. Авторы советуют дообучать на своих данных с него | `weights/dfine_<m>_obj365.pth` |
+| `obj2coco` | s, m, l, x | Objects365, затем COCO (лучший AP на COCO) | `weights/dfine_<m>_obj2coco.pth` (L: `_e25`) |
+| `coco` | n, s, m, l, x | COCO | `weights/dfine_<m>_coco.pth` |
+| бэкбон | n, s, m, l, x | ImageNet, HGNetv2 B0/B0/B2/B4/B5 | `weight/hgnetv2/PPHGNetV2_<B>_stage1.pth` |
+
+Бэкбон нужен только для обучения без чекпоинта детектора (`weights: none`). При дообучении все веса берутся
+из чекпоинта. Если GitHub недоступен: прокси `HTTPS_PROXY=http://proxy:port bash scripts/download_weights.sh`
+или копия файлов с другой машины в `weights/` и `weight/hgnetv2/`.
+
+## 2. Конфигурация: только `experiment.yml`
+
+Редактируется один файл. Основные поля:
+
+| Поле | Что задаёт |
+|---|---|
+| `name`, `output_root` | папка результатов `outputs/<name>/` |
+| `model` | `n` \| `s` \| `m` \| `l` \| `x` |
+| `pretrain` | стартовый чекпоинт для `weights: auto` и рецепт дообучения: `obj365` → upstream-рецепт `obj2custom`, `obj2coco` и `coco` → рецепт `custom` |
+| `weights` | `auto` (чекпоинт по `pretrain`), путь к чекпоинту или `best.pth`, `none` (только ImageNet-бэкбон) |
+| `data` | `format: csv` (путь к CSV, `class_merge`) или `format: coco` (пути к изображениям и json) |
+| `input_size` | `[h, w]`, кратно 32. Прямоугольник (например `[128, 800]` для полос 1600×256) работает без multi-scale |
+| `epochs`, `batch_size`, `workers` | расписание рецепта пересчитывается под `epochs` |
+| `devices` | номера GPU, как в `nvidia-smi`. Несколько номеров включают DDP, см. [Несколько GPU](#несколько-gpu-ddp) |
+| `optimizer`, `lr`, `backbone_lr_ratio`, `weight_decay` | `adamw` (рецепт D-FINE) или `sgd`; `auto` — lr рецепта, пересчитанный на batch (AdamW), или 0.01 (SGD); доля lr бэкбона из рецепта (X 0.01, L 0.05, M 0.1, S/N 0.5) |
+| `best_metric` | `map50` или `map`: по этой метрике выбирается `best.pth` |
+
+Что генератор берёт из рецепта и как пересчитывает:
+- **Стадии.** В D-FINE одна граница: на ней выключаются аугментации (`RandomPhotometricDistort`,
+  `RandomZoomOut`, `RandomIoUCrop`) и multi-scale, перезагружаются лучшие веса первой стадии и перезапускается
+  EMA. Хвост без аугментаций занимает ту же долю эпох, что в рецепте: для 12 эпох и `obj2custom` это последние
+  2 эпохи. При `epochs < 3` хвоста нет.
+- **Warmup.** Warmup lr — 0.5 эпохи, а если рецепт его не задаёт (`obj2custom`), то 0. Warmup EMA — всегда
+  1.5 эпохи, как в deim-steel. В `obj2custom` он равен 0, и тогда EMA с decay 0.9999 с первого шага почти не
+  уходит от стартовых весов. После 1 эпохи на полосах стали mAP EMA-модели был около 0, а после 12 эпох в ней
+  осталось бы около 73% стартового чекпоинта со случайными головами классов.
+- **SGD.** clip 10 вместо 0.1 из рецепта AdamW, Nesterov, momentum 0.9.
+
+### Данные в CSV
+
+Одна строка на бокс, лишние столбцы игнорируются:
+
+| Столбец | Значение |
+|---|---|
+| `image_path` | абсолютный путь к изображению (строка) |
+| `instance_label` | класс (строка) |
+| `bbox_x_tl`, `bbox_y_tl`, `bbox_x_br`, `bbox_y_br` | левый верхний и правый нижний угол, пиксели исходного изображения |
+| `split` | `train`, `val` или `test`. Строки с другими значениями пропускаются с предупреждением |
+
+- Пустые `instance_label` или bbox означают изображение без боксов: чистое изображение или неразмеченный test.
+- `class_merge` объединяет классы по строковым меткам, например `{scratch_small: scratch}`. Классы нумеруются 0..K-1 в отсортированном порядке, одинаково для всех выборок.
+- CSV конвертируется в COCO один раз, в `data_cache/<name>/`. Изображения не копируются. При изменении CSV конвертация повторяется.
+- Старый формат `train_bboxes.csv` (`ImageId, ClassId, x_min, y_min, x_max, y_max, split` плюс папка `images`) определяется по заголовку.
+
+`tools/steel/prepare_experiment.py` собирает из этого файла полный конфиг D-FINE
+`configs/_generated/<name>.yml`. Его не нужно править руками: он перезаписывается при каждом запуске.
+
+## 3. Обучение
+
+```bash
+bash train.sh                     # = python tools/steel/prepare_experiment.py experiment.yml --train
+bash train.sh my_experiment.yml   # другой файл эксперимента
 ```
 
-```shell
-${BASE_DIR}/val
-├── images
-│   ├── v1
-│   │   ├── patch0
-│   │   │   ├── 000000000.jpg
-│   │   │   └── ... (more images)
-│   ├── v2
-│   │   ├── patchx
-│   │   │   ├── 000000000.jpg
-│   │   │   └── ... (more images)
-├── zhiyuan_objv2_val.json
+Результаты лежат в `outputs/<name>/`:
+- `best.pth` — только лучшие веса (EMA) по `best_metric`, вместе с конфигом модели и именами классов: для инференса больше ничего не нужно. Промежуточные чекпоинты D-FINE ведёт в `outputs/<name>/.state/` и удаляет после обучения;
+- `metrics.png` и `metrics.csv` — обновляются после каждой эпохи: mAP@0.5, mAP@0.5:0.95, precision, recall, F1 (точка лучшего F1 при IoU 0.5), AP@0.5 по классам, train loss, lr;
+- `log.txt`, `train.log`, `summary/` (TensorBoard);
+- `train_samples/`, `val_samples/` — первый батч обучения и валидации с нарисованной разметкой (upstream D-FINE), чтобы проверить аугментации и боксы.
+
+Дообучить ещё раз с лучших весов: `weights: outputs/<name>/best.pth`.
+
+### Несколько GPU (DDP)
+
+```yaml
+devices: [0, 1, 2, 3]   # в experiment.yml; запуск тот же: bash train.sh
 ```
 
-4. Create a New Directory to Store Images from the Validation Set:
-```shell
-mkdir -p ${BASE_DIR}/train/images_from_val
+При нескольких номерах `train.sh` запускает `torchrun --standalone --nproc_per_node=N train.py ...`: это штатный DDP
+D-FINE с SyncBatchNorm, свободный порт выбирается сам. `batch_size` и `val_batch_size` задают общий batch на все
+GPU, как `total_batch_size` в D-FINE: на каждой карте `batch_size / N`, число итераций за эпоху, lr и warmup те же,
+что на одной карте. Поэтому batch должен делиться на N, а чтобы занять память каждой карты, его увеличивают в N раз.
+`workers` считаются на каждый процесс. Лучшие веса, метрики и графики пишет только процесс rank 0.
+DDP работает только на Linux. `torchrun` из Windows-сборок torch 2.7 не запускается (они собраны без libuv),
+поэтому `train.sh` на Windows с несколькими `devices` остановится с сообщением об этом.
+
+## 4. Оценка
+
+```bash
+python tools/steel/evaluate.py experiment.yml --fps                  # val: mAP, P/R/F1, AP по классам, FPS
+python tools/steel/evaluate.py experiment.yml --split test --conf 0.3
 ```
 
-5. Copy the v1 and v2 folders from the val directory into the train/images_from_val directory
-```shell
-cp -r ${BASE_DIR}/val/images/v1 ${BASE_DIR}/train/images_from_val/
-cp -r ${BASE_DIR}/val/images/v2 ${BASE_DIR}/train/images_from_val/
-```
+В `outputs/<name>/` появляются:
+- `<split>_predictions.csv` — предсказания в формате инференса (ниже), `confidence ≥ --conf`;
+- `<split>_predictions.json` — все боксы в формате COCO;
+- `eval_<split>.json` — метрики, если у выборки есть разметка. Для неразмеченного test создаются только предсказания.
 
-6. Run remap_obj365.py to merge a subset of the validation set into the training set. Specifically, this script moves samples with indices between 5000 and 800000 from the validation set to the training set.
-```shell
-python tools/remap_obj365.py --base_dir ${BASE_DIR}
-```
+FPS меряется при batch 1 и включает чтение, модель и постобработку.
 
-
-7. Run the resize_obj365.py script to resize any images in the dataset where the maximum edge length exceeds 640 pixels. Use the updated JSON file generated in Step 5 to process the sample data. Ensure that you resize images in both the train and val datasets to maintain consistency.
-```shell
-python tools/resize_obj365.py --base_dir ${BASE_DIR}
-```
-
-8. Modify paths in [obj365_detection.yml](./configs/dataset/obj365_detection.yml)
-
-    ```yaml
-    train_dataloader:
-        img_folder: /data/Objects365/data/train
-        ann_file: /data/Objects365/data/train/new_zhiyuan_objv2_train_resized.json
-    val_dataloader:
-        img_folder: /data/Objects365/data/val/
-        ann_file: /data/Objects365/data/val/new_zhiyuan_objv2_val_resized.json
-    ```
-
-
-</details>
-
-<details>
-<summary>CrowdHuman</summary>
-
-Download COCO format dataset here: [url](https://aistudio.baidu.com/datasetdetail/231455)
-
-</details>
-
-<details>
-<summary>Custom Dataset</summary>
-
-To train on your custom dataset, you need to organize it in the COCO format. Follow the steps below to prepare your dataset:
-
-1. **Set `remap_mscoco_category` to `False`:**
-
-    This prevents the automatic remapping of category IDs to match the MSCOCO categories.
-
-    ```yaml
-    remap_mscoco_category: False
-    ```
-
-2. **Organize Images:**
-
-    Structure your dataset directories as follows:
-
-    ```shell
-    dataset/
-    ├── images/
-    │   ├── train/
-    │   │   ├── image1.jpg
-    │   │   ├── image2.jpg
-    │   │   └── ...
-    │   ├── val/
-    │   │   ├── image1.jpg
-    │   │   ├── image2.jpg
-    │   │   └── ...
-    └── annotations/
-        ├── instances_train.json
-        ├── instances_val.json
-        └── ...
-    ```
-
-    - **`images/train/`**: Contains all training images.
-    - **`images/val/`**: Contains all validation images.
-    - **`annotations/`**: Contains COCO-formatted annotation files.
-
-3. **Convert Annotations to COCO Format:**
-
-    If your annotations are not already in COCO format, you'll need to convert them. You can use the following Python script as a reference or utilize existing tools:
-
-    ```python
-    import json
-
-    def convert_to_coco(input_annotations, output_annotations):
-        # Implement conversion logic here
-        pass
-
-    if __name__ == "__main__":
-        convert_to_coco('path/to/your_annotations.json', 'dataset/annotations/instances_train.json')
-    ```
-
-4. **Update Configuration Files:**
-
-    Modify your [custom_detection.yml](./configs/dataset/custom_detection.yml).
-
-    ```yaml
-    task: detection
-
-    evaluator:
-      type: CocoEvaluator
-      iou_types: ['bbox', ]
-
-    num_classes: 777 # your dataset classes
-    remap_mscoco_category: False
-
-    train_dataloader:
-      type: DataLoader
-      dataset:
-        type: CocoDetection
-        img_folder: /data/yourdataset/train
-        ann_file: /data/yourdataset/train/train.json
-        return_masks: False
-        transforms:
-          type: Compose
-          ops: ~
-      shuffle: True
-      num_workers: 4
-      drop_last: True
-      collate_fn:
-        type: BatchImageCollateFunction
-
-    val_dataloader:
-      type: DataLoader
-      dataset:
-        type: CocoDetection
-        img_folder: /data/yourdataset/val
-        ann_file: /data/yourdataset/val/ann.json
-        return_masks: False
-        transforms:
-          type: Compose
-          ops: ~
-      shuffle: False
-      num_workers: 4
-      drop_last: False
-      collate_fn:
-        type: BatchImageCollateFunction
-    ```
-
-</details>
-
-
-## Usage
-<details open>
-<summary> COCO2017 </summary>
-
-<!-- <summary>1. Training </summary> -->
-1. Set Model
-```shell
-export model=l  # n s m l x
-```
-
-2. Training
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/dfine_hgnetv2_${model}_coco.yml --use-amp --seed=0
-```
-
-<!-- <summary>2. Testing </summary> -->
-3. Testing
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/dfine_hgnetv2_${model}_coco.yml --test-only -r model.pth
-```
-
-<!-- <summary>3. Tuning </summary> -->
-4. Tuning
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/dfine_hgnetv2_${model}_coco.yml --use-amp --seed=0 -t model.pth
-```
-</details>
-
-
-<details>
-<summary> Objects365 to COCO2017 </summary>
-
-1. Set Model
-```shell
-export model=l  # n s m l x
-```
-
-2. Training on Objects365
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/objects365/dfine_hgnetv2_${model}_obj365.yml --use-amp --seed=0
-```
-
-3. Tuning on COCO2017
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/objects365/dfine_hgnetv2_${model}_obj2coco.yml --use-amp --seed=0 -t model.pth
-```
-
-<!-- <summary>2. Testing </summary> -->
-4. Testing
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/dfine_hgnetv2_${model}_coco.yml --test-only -r model.pth
-```
-</details>
-
-
-<details>
-<summary> Custom Dataset </summary>
-
-1. Set Model
-```shell
-export model=l  # n s m l x
-```
-
-2. Training on Custom Dataset
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/custom/dfine_hgnetv2_${model}_custom.yml --use-amp --seed=0
-```
-<!-- <summary>2. Testing </summary> -->
-3. Testing
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/custom/dfine_hgnetv2_${model}_custom.yml --test-only -r model.pth
-```
-
-4. Tuning on Custom Dataset
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/custom/objects365/dfine_hgnetv2_${model}_obj2custom.yml --use-amp --seed=0 -t model.pth
-```
-
-5. **[Optional]** Modify Class Mappings:
-
-When using the Objects365 pre-trained weights to train on your custom dataset, the example assumes that your dataset only contains the classes `'Person'` and `'Car'`. For faster convergence, you can modify `self.obj365_ids` in `src/solver/_solver.py` as follows:
-
+## 5. Инференс
 
 ```python
-self.obj365_ids = [0, 5]  # Person, Cars
-```
-You can replace these with any corresponding classes from your dataset. The list of Objects365 classes with their corresponding IDs:
-https://github.com/Peterande/D-FINE/blob/352a94ece291e26e1957df81277bef00fe88a8e3/src/solver/_solver.py#L330
+from tools.steel.infer import Detector   # из корня репозитория; иначе сначала sys.path.insert(0, "<путь к dfine-wrapper>")
 
-New training command:
-
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 train.py -c configs/dfine/custom/dfine_hgnetv2_${model}_custom.yml --use-amp --seed=0 -t model.pth
+det = Detector("outputs/dfine_x_800x128/best.pth")             # device="cuda" по умолчанию, если есть GPU
+df = det.predict("/data/new_images", conf=0.3)                 # папка
+df = det.predict(["/data/a.jpg", "/data/b.jpg"])               # список путей
+df = det.predict(my_df)                                        # DataFrame или CSV со столбцом image_path (+ split)
 ```
 
-However, if you don't wish to modify the class mappings, the pre-trained Objects365 weights will still work without any changes. Modifying the class mappings is optional and can potentially accelerate convergence for specific tasks.
+То же из командной строки (результат по умолчанию пишется в `predictions.csv` рядом с весами):
 
-
-
-</details>
-
-<details>
-<summary> Customizing Batch Size </summary>
-
-For example, if you want to double the total batch size when training D-FINE-L on COCO2017, here are the steps you should follow:
-
-1. **Modify your [dataloader.yml](./configs/dfine/include/dataloader.yml)** to increase the `total_batch_size`:
-
-    ```yaml
-    train_dataloader:
-        total_batch_size: 64  # Previously it was 32, now doubled
-    ```
-
-2. **Modify your [dfine_hgnetv2_l_coco.yml](./configs/dfine/dfine_hgnetv2_l_coco.yml)**. Here’s how the key parameters should be adjusted:
-
-    ```yaml
-    optimizer:
-    type: AdamW
-    params:
-        -
-        params: '^(?=.*backbone)(?!.*norm|bn).*$'
-        lr: 0.000025  # doubled, linear scaling law
-        -
-        params: '^(?=.*(?:encoder|decoder))(?=.*(?:norm|bn)).*$'
-        weight_decay: 0.
-
-    lr: 0.0005  # doubled, linear scaling law
-    betas: [0.9, 0.999]
-    weight_decay: 0.0001  # need a grid search
-
-    ema:  # added EMA settings
-        decay: 0.9998  # adjusted by 1 - (1 - decay) * 2
-        warmups: 500  # halved
-
-    lr_warmup_scheduler:
-        warmup_duration: 250  # halved
-    ```
-
-</details>
-
-
-<details>
-<summary> Customizing Input Size </summary>
-
-If you'd like to train **D-FINE-L** on COCO2017 with an input size of 320x320, follow these steps:
-
-1. **Modify your [dataloader.yml](./configs/dfine/include/dataloader.yml)**:
-
-    ```yaml
-
-    train_dataloader:
-    dataset:
-        transforms:
-            ops:
-                - {type: Resize, size: [320, 320], }
-    collate_fn:
-        base_size: 320
-    dataset:
-        transforms:
-            ops:
-                - {type: Resize, size: [320, 320], }
-    ```
-
-2. **Modify your [dfine_hgnetv2.yml](./configs/dfine/include/dfine_hgnetv2.yml)**:
-
-    ```yaml
-    eval_spatial_size: [320, 320]
-    ```
-
-</details>
-
-## Tools
-<details>
-<summary> Deployment </summary>
-
-<!-- <summary>4. Export onnx </summary> -->
-1. Setup
-```shell
-pip install onnx onnxsim
-export model=l  # n s m l x
+```bash
+python tools/steel/infer.py outputs/dfine_x_800x128/best.pth /data/new_images --conf 0.3 --out preds.csv
 ```
 
-2. Export onnx
-```shell
-python tools/deployment/export_onnx.py --check -c configs/dfine/dfine_hgnetv2_${model}_coco.yml -r model.pth
+`predict` возвращает pandas DataFrame в формате обучающего CSV плюс `confidence`, одна строка на бокс:
+
+| Столбец | Значение |
+|---|---|
+| `image_path` | путь как на входе; относительный путь превращается в абсолютный |
+| `instance_label` | имя класса, как в обучающих данных |
+| `bbox_x_tl`, `bbox_y_tl`, `bbox_x_br`, `bbox_y_br` | углы бокса в пикселях исходного изображения, обрезаны по его границам |
+| `split` | из входного CSV или DataFrame, иначе аргумент `split` (по умолчанию `test`) |
+| `confidence` | уверенность модели, 0..1. В строке остаются боксы с `confidence ≥ conf` |
+
+Изображение без боксов выше порога даёт одну строку с пустыми `instance_label`, bbox и `confidence`, как в
+обучающем CSV (`keep_empty=False` или `--no-empty` такие строки убирает). Поэтому результат можно без изменений
+подать обратно в `csv_to_coco`, например как псевдоразметку. Сырые результаты без порога и имён классов отдаёт
+`det.detect(paths)`: по изображению выдаются `(path, (w, h), labels, boxes_xyxy, scores)`.
+
+По умолчанию модель собирается в режиме deploy, как в upstream `tools/inference`: conv+BN энкодера слиты,
+декодер обрезан до `eval_idx`. Так быстрее, но уверенности могут отличаться от валидации при обучении в
+последних знаках. `Detector(..., deploy=False)` воспроизводит валидацию точно. Этим режимом пользуется
+`evaluate.py`: его mAP совпадает до последнего знака с upstream-валидацией D-FINE на том же `best.pth`. С числом
+в `metrics.csv` возможна разница в 4-м знаке (проверено: 0.1741 против 0.1738), потому что внутри процесса
+обучения GPU выбирает другие алгоритмы свёрток.
+
+Чекпоинтам без встроенного конфига (`last.pth`/`best_stg*.pth` upstream D-FINE, веса из `weights/`) нужен
+конфиг: `Detector(ckpt, config="configs/_generated/<name>.yml")`. Для `outputs/<name>/` он находится сам. Для
+COCO-весов D-FINE (`configs/dfine/dfine_hgnetv2_<m>_coco.yml`) подставляются имена 80 классов COCO.
+
+## 6. Экспорт в ONNX
+
+```bash
+python tools/steel/export_onnx.py                      # best.pth из experiment.yml -> outputs/<name>/best.onnx
+python tools/steel/export_onnx.py path/to/best.pth --out model.onnx
+python tools/steel/export_onnx.py weights/dfine_x_coco.pth --config configs/dfine/dfine_hgnetv2_x_coco.yml
 ```
 
-3. Export [tensorrt](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
-```shell
-trtexec --onnx="model.onnx" --saveEngine="model.engine" --fp16
+Конфиг модели и имена классов берутся из `best.pth`, поэтому экспорт совпадает с обученной моделью, даже если
+`experiment.yml` потом правили: из него берётся только путь к `outputs/<name>/best.pth`. Чекпоинтам без встроенного
+конфига (веса D-FINE из `weights/`, upstream-чекпоинты) нужен `--config`. После экспорта скрипт прогоняет PyTorch и
+onnxruntime на нескольких изображениях (`--images` или первые из val) с batch 3 и 1 и сравнивает результаты.
+Бит в бит они не совпадают: ядра CPU различаются в последних битах, а выбор top-k запросов в декодере может
+поменять местами почти равные запросы. Сильнее всего это видно у слабо обученной модели: после 1 эпохи на
+полосах уверенности расходились до 9e-3, а AP50 на val было 0.1756 у ONNX против 0.1740 у PyTorch. Проверка
+проходит, если отсортированные уверенности отличаются меньше чем на 0.02 и не меньше 90% топ-20 детекций ONNX
+есть и у PyTorch (тот же класс, IoU ≥ 0.9, уверенность ±0.01). Иначе скрипт завершается с ошибкой. Сломанный
+экспорт не проходит её с большим запасом: с неверной нормализацией совпали 5% детекций.
+
+| | Имя | Форма | Что это |
+|---|---|---|---|
+| вход | `images` | `float32 [N, 3, H, W]` | RGB, сжато до W×H (bilinear), /255. Нормализации у D-FINE нет (`normalize` в метаданных = null) |
+| вход | `orig_target_sizes` | `int64 [N, 2]` | исходные (ширина, высота) |
+| выход | `labels` | `int64 [N, 300]` | номер класса, имя — `class_names[label]` |
+| выход | `boxes` | `float32 [N, 300, 4]` | x_tl, y_tl, x_br, y_br в пикселях исходного изображения |
+| выход | `scores` | `float32 [N, 300]` | уверенность 0..1 |
+
+Batch N гибкий, размер входа H×W фиксирован тем `input_size`, на котором училась модель. Sigmoid и выбор
+top-300 уже внутри графа, NMS не нужен. В метаданных файла лежат `class_names`, `input_size` и `normalize`,
+так что ONNX-файл самодостаточен. Его можно запускать тремя способами:
+- через `Detector("best.onnx")` с тем же API: `detect` для сырых результатов, `predict` для CSV-формата;
+- без кода репозитория, только onnxruntime, numpy и PIL:
+
+```python
+import json
+import numpy as np
+import onnxruntime as ort
+from PIL import Image
+
+sess = ort.InferenceSession("best.onnx", providers=[p for p in ("CUDAExecutionProvider", "CPUExecutionProvider")
+                                                    if p in ort.get_available_providers()])
+meta = sess.get_modelmeta().custom_metadata_map
+names = json.loads(meta["class_names"])
+h, w = json.loads(meta["input_size"])
+norm = json.loads(meta["normalize"])  # [mean, std] or None
+
+def detect(path, conf=0.5):
+    img = Image.open(path).convert("RGB")
+    x = np.asarray(img.resize((w, h), Image.BILINEAR), dtype=np.float32) / 255
+    if norm:
+        x = (x - np.array(norm[0], np.float32)) / np.array(norm[1], np.float32)
+    x = x.transpose(2, 0, 1)[None]  # [1, 3, h, w]
+    size = np.array([[img.width, img.height]], dtype=np.int64)
+    labels, boxes, scores = sess.run(None, {"images": x, "orig_target_sizes": size})
+    keep = scores[0] >= conf
+    return [(names[l], float(s), [round(float(v), 1) for v in b])
+            for l, s, b in zip(labels[0][keep], scores[0][keep], boxes[0][keep])]
+
+detect("bus.jpg")   # [('bus', 0.965, [3.9, 229.3, 804.9, 735.5]), ('person', 0.954, [49.5, 398.2, 244.9, 904.7]), ...]
 ```
 
-</details>
+- на GPU: вместо `onnxruntime` поставить `onnxruntime-gpu`, оба пакета вместе ставить нельзя. Для TensorRT см.
+  [README_DFINE.md](README_DFINE.md).
 
-<details>
-<summary> Inference (Visualization) </summary>
+## Старый способ
 
+Upstream-запуск работает без изменений. Новые возможности включаются только ключами, которые пишет генератор
+(`save_best_only`, `best_metric`, `plot_metrics`):
 
-1. Setup
-```shell
-pip install -r tools/inference/requirements.txt
-export model=l  # n s m l x
+```bash
+python train.py -c configs/dfine/custom/objects365/dfine_hgnetv2_x_obj2custom.yml --use-amp --seed=0 -t weights/dfine_x_obj365.pth
 ```
 
+## Изменения относительно upstream
 
-<!-- <summary>5. Inference </summary> -->
-2. Inference (onnxruntime / tensorrt / torch)
+| Файл | Зачем |
+|---|---|
+| `src/solver/det_solver.py` | `save_best_only`, `best_metric`, `plot_metrics` (по умолчанию выключены); `best.pth` хранит конфиг и имена классов; `barrier()` перед перезагрузкой `best_stg1.pth` при смене стадии: в DDP остальные ранги могли читать файл, который rank 0 ещё пишет |
+| `src/misc/metrics_log.py` | `metrics.csv` и `metrics.png` по эпохам |
+| `src/misc/profiler_utils.py` | подсчёт FLOPs на `eval_spatial_size`: прямоугольный вход падал на квадратной заглушке |
+| `src/optim/optim.py` | `SGDIgnoreBetas`: SGD, которому не мешает `betas` из базовых AdamW-конфигов |
+| `src/misc/dist_utils.py` | gloo, если нет NCCL; при `WORLD_SIZE > 1` ошибка инициализации DDP больше не превращается молча в N независимых обучений |
+| `src/core/yaml_utils.py` | `load_config` без общего словаря по умолчанию: второй конфиг в том же процессе смешивался с первым |
+| `src/data/transforms/_transforms.py` | `PadToSize` для torchvision ≥ 0.21: `transform` / `make_params` и `F.get_size` вместо удалённого `get_spatial_size` |
+| `tools/steel/*`, `scripts/download_weights.sh`, `train.sh`, `experiment.yml` | единый конфиг, запуск DDP, загрузка весов, конвертация CSV → COCO, оценка, инференс, экспорт в ONNX |
 
-Inference on images and videos is now supported.
-```shell
-python tools/inference/onnx_inf.py --onnx model.onnx --input image.jpg  # video.mp4
-python tools/inference/trt_inf.py --trt model.engine --input image.jpg
-python tools/inference/torch_inf.py -c configs/dfine/dfine_hgnetv2_${model}_coco.yml -r model.pth --input image.jpg --device cuda:0
-```
-</details>
+## Замечания
 
-<details>
-<summary> Benchmark </summary>
-
-1. Setup
-```shell
-pip install -r tools/benchmark/requirements.txt
-export model=l  # n s m l x
-```
-
-<!-- <summary>6. Benchmark </summary> -->
-2. Model FLOPs, MACs, and Params
-```shell
-python tools/benchmark/get_info.py -c configs/dfine/dfine_hgnetv2_${model}_coco.yml
-```
-
-2. TensorRT Latency
-```shell
-python tools/benchmark/trt_benchmark.py --COCO_dir path/to/COCO2017 --engine_dir model.engine
-```
-</details>
-
-<details>
-<summary> Fiftyone Visualization  </summary>
-
-1. Setup
-```shell
-pip install fiftyone
-export model=l  # n s m l x
-```
-4. Voxel51 Fiftyone Visualization ([fiftyone](https://github.com/voxel51/fiftyone))
-```shell
-python tools/visualization/fiftyone_vis.py -c configs/dfine/dfine_hgnetv2_${model}_coco.yml -r model.pth
-```
-</details>
-
-<details>
-<summary> Others </summary>
-
-1. Auto Resume Training
-```shell
-bash reference/safe_training.sh
-```
-
-2. Converting Model Weights
-```shell
-python reference/convert_weight.py model.pth
-```
-</details>
-
-## Figures and Visualizations
-
-<details>
-<summary> FDR and GO-LSD </summary>
-
-1. Overview of D-FINE with FDR. The probability distributions that act as a more fine-
-grained intermediate representation are iteratively refined by the decoder layers in a residual manner.
-Non-uniform weighting functions are applied to allow for finer localization.
-
-<p align="center">
-    <img src="https://raw.githubusercontent.com/Peterande/storage/master/figs/fdr-1.jpg" alt="Fine-grained Distribution Refinement Process" width="1000">
-</p>
-
-2. Overview of GO-LSD process. Localization knowledge from the final layer’s refined
-distributions is distilled into earlier layers through DDF loss with decoupled weighting strategies.
-
-<p align="center">
-    <img src="https://raw.githubusercontent.com/Peterande/storage/master/figs/go_lsd-1.jpg" alt="GO-LSD Process" width="1000">
-</p>
-
-</details>
-
-<details open>
-<summary> Distributions </summary>
-
-Visualizations of FDR across detection scenarios with initial and refined bounding boxes, along with unweighted and weighted distributions.
-
-<p align="center">
-    <img src="https://raw.githubusercontent.com/Peterande/storage/master/figs/merged_image.jpg" width="1000">
-</p>
-
-</details>
-
-<details>
-<summary> Hard Cases </summary>
-
-The following visualization demonstrates D-FINE's predictions in various complex detection scenarios. These include cases with occlusion, low-light conditions, motion blur, depth of field effects, and densely populated scenes. Despite these challenges, D-FINE consistently produces accurate localization results.
-
-<p align="center">
-    <img src="https://raw.githubusercontent.com/Peterande/storage/master/figs/hard_case-1.jpg" alt="D-FINE Predictions in Challenging Scenarios" width="1000">
-</p>
-
-</details>
-
-
-<!-- <div style="display: flex; flex-wrap: wrap; justify-content: center; margin: 0; padding: 0;">
-    <img src="https://raw.githubusercontent.com/Peterande/storage/master/figs/merged_image.jpg" style="width:99.96%; margin: 0; padding: 0;" />
-</div>
-
-<table><tr>
-<td><img src=https://raw.githubusercontent.com/Peterande/storage/master/figs/merged_image.jpg border=0 width=1000></td>
-</tr></table> -->
-
-
-
-
-## Citation
-If you use `D-FINE` or its methods in your work, please cite the following BibTeX entries:
-<details open>
-<summary> bibtex </summary>
-
-```latex
-@misc{peng2024dfine,
-      title={D-FINE: Redefine Regression Task in DETRs as Fine-grained Distribution Refinement},
-      author={Yansong Peng and Hebei Li and Peixi Wu and Yueyi Zhang and Xiaoyan Sun and Feng Wu},
-      year={2024},
-      eprint={2410.13842},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
-}
-```
-</details>
-
-## Acknowledgement
-Our work is built upon [RT-DETR](https://github.com/lyuwenyu/RT-DETR).
-Thanks to the inspirations from [RT-DETR](https://github.com/lyuwenyu/RT-DETR), [GFocal](https://github.com/implus/GFocal), [LD](https://github.com/HikariTJU/LD), and [YOLOv9](https://github.com/WongKinYiu/yolov9).
-
-✨ Feel free to contribute and reach out if you have any questions! ✨
+- **Windows: при нехватке видеопамяти драйвер молча переносит её в системную RAM вместо ошибки OOM**, и обучение замедляется в десятки раз. Batch подбирайте с запасом. Для X на 128×800 и 16 ГБ batch 20 даёт пик 12.3 ГБ по `nvidia-smi`, включая около 1.2 ГБ рабочего стола. Эпоха на 5332 изображениях идёт около 2.5 минуты на RTX 5070 Ti.
+- **Прямоугольный вход:** multi-scale в D-FINE строит квадратные батчи, поэтому для прямоугольника он выключается. Проверка в `prepare_experiment.py` не даст включить его вручную. Anchors и позиционные кодировки D-FINE считает от `eval_spatial_size`; при загрузке COCO/Objects365-чекпоинта anchors для 640×640 не совпадают по форме и не грузятся, это ожидаемо.
+- **Головы классов** чекпоинта (80 или 366 классов) при другом числе классов не загружаются и обучаются с нуля. Upstream-перенос голов Objects365 → COCO рассчитан только на 80 классов COCO и для своих данных не срабатывает.
+- **Меньше 3 эпох:** финальная стадия без аугментаций не создаётся, иначе смена стадий попала бы на эпоху 0.
